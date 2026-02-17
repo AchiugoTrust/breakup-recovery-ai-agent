@@ -231,9 +231,9 @@ if st.session_state.get('active_groq_key') and not st.session_state.get('agents_
         st.session_state.agents_initialized = False    
 
 # Main content
-st.title("💔 Breakup Recovery")
+st.title("Going through hard times?💔")
 st.markdown("""
-    ### Your AI-powered breakup recovery agent is here to help!
+    ### Your AI-powered therapist is here to help!
     Share your feelings ~~and chat screenshots~~ **(coming soon)**, and we'll help you navigate through this tough time.
 """)
 
