@@ -204,39 +204,6 @@ with st.sidebar:
     """)
 
 
-# Add this RIGHT AFTER your sidebar code (for debugging)
-with st.expander("🔧 Debug Info (remove after fixing)"):
-    st.write("### Session State Debug")
-    st.write(f"agents_initialized: {st.session_state.get('agents_initialized', False)}")
-    st.write(f"active_groq_key exists: {bool(st.session_state.get('active_groq_key'))}")
-    st.write(f"therapist_agent exists: {bool(st.session_state.get('therapist_agent'))}")
-    st.write(f"closure_agent exists: {bool(st.session_state.get('closure_agent'))}")
-    st.write(f"routine_planner_agent exists: {bool(st.session_state.get('routine_planner_agent'))}")
-    st.write(f"brutal_honesty_agent exists: {bool(st.session_state.get('brutal_honesty_agent'))}")
-    
-    if st.button("Force Reinitialize"):
-        st.session_state.agents_initialized = False
-        st.rerun()
-
-
-    if st.session_state.get('active_groq_key') and not st.session_state.get('agents_initialized', False):
-        try:
-            with st.spinner("🔄 Initializing AI agents with Groq..."):
-                therapist, closure, routine, brutal = initialize_agents(groq_key)
-                
-                if all([therapist, closure, routine, brutal]):
-                    st.session_state.therapist_agent = therapist
-                    st.session_state.closure_agent = closure
-                    st.session_state.routine_planner_agent = routine
-                    st.session_state.brutal_honesty_agent = brutal
-                    st.session_state.agents_initialized = True
-                    st.success("✅ Agents ready with Groq! (Free tier: 1000 requests/day)")
-                    st.balloons()
-                    st.rerun()
-                    time.sleep(1)
-        except Exception as e:
-            st.error(f"Failed to initialize agents: {e}")
-
     
 
 # Main content
