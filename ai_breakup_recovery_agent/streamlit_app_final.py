@@ -153,6 +153,7 @@ def call_with_rate_limit(agent, prompt, images=None, max_retries=3):
 with st.sidebar:
     st.header("🔑 API Configuration")
 
+
     # Option 1: Use keys from secrets (pre-configured)
     use_default_keys = st.checkbox("Use app's default API keys (recommended)", value=False)
 
@@ -204,7 +205,6 @@ with st.sidebar:
     """)
 
 
-# Add this RIGHT AFTER your sidebar code (for debugging)
 if st.session_state.get('active_groq_key') and not st.session_state.get('agents_initialized', False):
     try:
         with st.spinner("🔄 Initializing AI agents with Groq..."):
@@ -216,10 +216,15 @@ if st.session_state.get('active_groq_key') and not st.session_state.get('agents_
                 st.session_state.routine_planner_agent = routine
                 st.session_state.brutal_honesty_agent = brutal
                 st.session_state.agents_initialized = True
-                st.success("✅ Agents ready with Groq! (Free tier: 1000 requests/day)")
+                success_msg = st.success("✅ Agents ready with Groq! (Free tier: 1000 requests/day)")
                 st.balloons()
                 
+                time.sleep(2)
+                success_msg.empty()
                 st.rerun()
+
+
+
                 
     except Exception as e:
         st.error(f"Failed to initialize agents: {e}")
