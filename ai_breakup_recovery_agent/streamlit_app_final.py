@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 # Set page config and UI elements
 st.set_page_config(
-    page_title="💔 Your Breakup Recovery",
+    page_title="Your Breakup Recovery",
     page_icon="💔",
     layout="wide"
 )
@@ -224,7 +224,7 @@ with st.sidebar:
     
 
 # Main content
-st.title("💔 Valentine Breakup Recovery")
+st.title("💔 Breakup Recovery")
 st.markdown("""
     ### Your AI-powered breakup recovery agent is here to help!
     Share your feelings ~~and chat screenshots~~ **(functionality coming soon)**, and we'll help you navigate through this tough time.
@@ -255,7 +255,7 @@ with col2:
             st.image(file, caption=file.name, use_container_width=True)
 
 # Process button and API key check
-if st.button("Start your Healing 💝", type="primary"):
+if st.button("Start your Healing", type="primary"):
     if not st.session_state.get('agents_initialized', False):
         st.warning("Please enter your Groq API key first!")
     else:
