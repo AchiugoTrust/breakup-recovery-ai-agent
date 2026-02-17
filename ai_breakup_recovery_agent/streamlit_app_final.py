@@ -30,18 +30,33 @@ if 'agents_initialized' not in st.session_state:
     st.session_state.brutal_honesty_agent = None
     st.session_state.api_key_input = None
 
+# For LOCAL development: Load from .streamlit/secrets.toml
+# For DEPLOYED app: Load from Streamlit Cloud secrets
+def get_api_keys():
+    try:
+        """Get API keys from secrets (works both locally and in cloud)"""
+        groq_key = st.secrets["GROQ_API_KEY"]
+        return groq_key
+    except:
+        # Fallback to environment variables for local testing
+        groq_key = os.getenv("GROQ_API_KEY")
+        if groq_key:
+            return groq_key
+        return None
+
 def initialize_agents(api_key: str) -> tuple[Agent, Agent, Agent, Agent]:
     try:
-        model = Groq(
+        groq_model = Groq(
             id="llama-3.3-70b-versatile",  # Best for general conversation
-            api_key=api_key  # Pass your Groq API key
+            api_key=groq_key  # Pass your Groq API key
         )
 
         time.sleep(1)
-
+        
+        st.session_state.groq_model = groq_model
         
         therapist_agent = Agent(
-            model=model,
+            model=groq_model,
             name="Therapist Agent",
             instructions=[
                 "You are an empathetic therapist that:",
@@ -59,7 +74,7 @@ def initialize_agents(api_key: str) -> tuple[Agent, Agent, Agent, Agent]:
 
 
         closure_agent = Agent(
-            model=model,
+            model=groq_model,
             name="Closure Agent",
             instructions=[
                 "You are a closure specialist that:",
@@ -76,7 +91,7 @@ def initialize_agents(api_key: str) -> tuple[Agent, Agent, Agent, Agent]:
 
 
         routine_planner_agent = Agent(
-            model=model,
+            model=groq_model,
             name="Routine Planner Agent",
             instructions=[
                 "You are a recovery routine planner that:",
@@ -92,7 +107,7 @@ def initialize_agents(api_key: str) -> tuple[Agent, Agent, Agent, Agent]:
 
 
         brutal_honesty_agent = Agent(
-            model=model,
+            model=groq_model,
             name="Brutal Honesty Agent",
             tools=[DuckDuckGoTools()],
             instructions=[
@@ -137,36 +152,62 @@ def call_with_rate_limit(agent, prompt, images=None, max_retries=3):
 with st.sidebar:
     st.header("🔑 API Configuration")
 
-    if "api_key_input" not in st.session_state:
-        st.session_state.api_key_input = ""
-        
-        
-    api_key = st.text_input(
-        "Enter your Groq API Key",
-        value=st.session_state.api_key_input,
-        type="password",
-        help="Get your API key from the Groq Console",
-        key="api_key_widget"  
-    )
+    # Option 1: Use keys from secrets (pre-configured)
+    use_default_keys = st.checkbox("Use app's default API keys (recommended)", value=False)
 
-    if api_key != st.session_state.api_key_input:
-        st.session_state.api_key_input = api_key
-        st.session_state.agents_initialized = False
-    
-    if api_key:
-        st.success("API Key provided! ✅")
+    if use_default_keys:
+        groq_key = get_api_keys()
+        if not groq_key:
+            st.error("App not configured with default keys. Please contact admin.")
+            st.stop()
     else:
-        st.warning("Please enter your API key to proceed")
-        st.markdown("""
-        To get your API key:
-        1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
-        2. Enable the Generative Language API in your [Google Cloud Console](https://console.developers.google.com/apis/api/generativelanguage.googleapis.com)
-        """)
+        # Option 2: Users bring their own keys
+        groq_key = st.text_input("Groq API Key:", type="password")
 
-    if api_key and not st.session_state.agents_initialized:
+   
+    if groq_key:
+        st.session_state.groq_key = groq_key
+        st.success("✅ API key set! Ready to use.")
+    
+
+    if use_default_keys:
+        st.session_state.active_groq_key = groq_key
+    else:
+        st.session_state.active_groq_key = groq_key
+    
+        
+    st.markdown("---")
+    
+    # Feature status
+    st.subheader("📱 Features")
+    st.markdown("""
+    ✅ **Available now:**
+    - 🤗 Emotional support 
+    - 💌 Closure messages
+    - 📅 Recovery planning
+    - 💪 Honest feedback
+    
+    🚀 **Coming soon:**
+    - 📸 Screenshot analysis
+    - 🎵 Music recommendations
+    - 📞 Crisis resource links
+    """)
+    
+    st.markdown("---")
+    
+    # About section
+    st.markdown("**About this app**")
+    st.markdown("""
+    Four AI agents work together to support you through difficult times.  
+    Built with Groq's lightning-fast Llama 3.3 model.
+    """)
+   
+
+
+    if st.session_state.get('active_groq_key') and not st.session_state.get('agents_initialized', False):
         try:
             with st.spinner("🔄 Initializing AI agents with Groq..."):
-                therapist, closure, routine, brutal = initialize_agents(api_key)
+                therapist, closure, routine, brutal = initialize_agents(groq_key)
                 
                 if all([therapist, closure, routine, brutal]):
                     st.session_state.therapist_agent = therapist
@@ -175,6 +216,7 @@ with st.sidebar:
                     st.session_state.brutal_honesty_agent = brutal
                     st.session_state.agents_initialized = True
                     st.success("✅ Agents ready with Groq! (Free tier: 1000 requests/day)")
+                    st.balloons()
                     time.sleep(1)
         except Exception as e:
             st.error(f"Failed to initialize agents: {e}")
