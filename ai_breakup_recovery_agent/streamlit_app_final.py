@@ -1,7 +1,6 @@
 from agno.agent import Agent
 from agno.models.groq import Groq
 from agno.media import Image as AgnoImage
-from agno.tools.duckduckgo import DuckDuckGoTools
 import streamlit as st
 from typing import List, Optional
 import logging
