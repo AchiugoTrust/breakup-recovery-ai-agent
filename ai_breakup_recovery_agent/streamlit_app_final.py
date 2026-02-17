@@ -204,13 +204,32 @@ with st.sidebar:
     """)
 
 
-    
+# Add this RIGHT AFTER your sidebar code (for debugging)
+if st.session_state.get('active_groq_key') and not st.session_state.get('agents_initialized', False):
+    try:
+        with st.spinner("🔄 Initializing AI agents with Groq..."):
+            therapist, closure, routine, brutal = initialize_agents(st.session_state.active_groq_key)
+            
+            if all([therapist, closure, routine, brutal]):
+                st.session_state.therapist_agent = therapist
+                st.session_state.closure_agent = closure
+                st.session_state.routine_planner_agent = routine
+                st.session_state.brutal_honesty_agent = brutal
+                st.session_state.agents_initialized = True
+                st.success("✅ Agents ready with Groq! (Free tier: 1000 requests/day)")
+                st.balloons()
+                
+                st.rerun()
+                
+    except Exception as e:
+        st.error(f"Failed to initialize agents: {e}")
+        st.session_state.agents_initialized = False    
 
 # Main content
 st.title("💔 Breakup Recovery")
 st.markdown("""
     ### Your AI-powered breakup recovery agent is here to help!
-    Share your feelings ~~and chat screenshots~~ **(functionality coming soon)**, and we'll help you navigate through this tough time.
+    Share your feelings ~~and chat screenshots~~ **(coming soon)**, and we'll help you navigate through this tough time.
 """)
 
 # User Input section
@@ -382,6 +401,6 @@ if st.button("Start your Healing", type="primary"):
 st.markdown("---")
 st.markdown("""
     <div style='text-align: center'>
-        <p>Made with ❤️ by <i> Trust </i></p>
+        <p>Made with ❤️ by <i> <a href=https://github.com/AchiugoTrust>Trust</a> </i></p>
     </div>
 """, unsafe_allow_html=True)
