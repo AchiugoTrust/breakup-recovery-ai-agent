@@ -234,7 +234,7 @@ if st.session_state.get('active_groq_key') and not st.session_state.get('agents_
 st.title("Going through a breakup?💔")
 st.markdown("""
     ### Your AI-powered therapist is here to help!
-    Share your feelings ~~and chat screenshots~~ **(coming later)**, and we'll help you navigate through this tough time.
+    Share your feelings ~~and chat screenshots~~ **(don't you dare..yet)**, and we'll help you navigate through this tough time.
 """)
 
 # User Input section
