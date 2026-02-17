@@ -406,6 +406,6 @@ if st.button("Start your Healing", type="primary"):
 st.markdown("---")
 st.markdown("""
     <div style='text-align: center'>
-        <p>Made with 🖤by <i> <a href=https://github.com/AchiugoTrust>Trust</a> </i></p>
+        <p>Made with 🖤 by <i> <a href=https://github.com/AchiugoTrust>Trust</a> </i></p>
     </div>
 """, unsafe_allow_html=True)
