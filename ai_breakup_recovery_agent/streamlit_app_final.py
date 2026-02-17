@@ -1,6 +1,7 @@
 from agno.agent import Agent
 from agno.models.groq import Groq
 from agno.media import Image as AgnoImage
+from agno.tools.duckduckgo import DuckDuckGoTools
 import streamlit as st
 from typing import List, Optional
 import logging
@@ -120,6 +121,9 @@ def initialize_agents(api_key: str) -> tuple[Agent, Agent, Agent, Agent]:
             markdown=True
         )
         time.sleep(1)
+
+        if not all([therapist_agent, closure_agent, routine_planner_agent, brutal_honesty_agent]):
+            raise Exception("One or more agents failed to initialize")
      
         return therapist_agent, closure_agent, routine_planner_agent, brutal_honesty_agent
     except Exception as e:
@@ -200,7 +204,21 @@ with st.sidebar:
     Four AI agents work together to support you through difficult times.  
     Built with Groq's lightning-fast Llama 3.3 model.
     """)
-   
+
+
+# Add this RIGHT AFTER your sidebar code (for debugging)
+with st.expander("🔧 Debug Info (remove after fixing)"):
+    st.write("### Session State Debug")
+    st.write(f"agents_initialized: {st.session_state.get('agents_initialized', False)}")
+    st.write(f"active_groq_key exists: {bool(st.session_state.get('active_groq_key'))}")
+    st.write(f"therapist_agent exists: {bool(st.session_state.get('therapist_agent'))}")
+    st.write(f"closure_agent exists: {bool(st.session_state.get('closure_agent'))}")
+    st.write(f"routine_planner_agent exists: {bool(st.session_state.get('routine_planner_agent'))}")
+    st.write(f"brutal_honesty_agent exists: {bool(st.session_state.get('brutal_honesty_agent'))}")
+    
+    if st.button("Force Reinitialize"):
+        st.session_state.agents_initialized = False
+        st.rerun()
 
 
     if st.session_state.get('active_groq_key') and not st.session_state.get('agents_initialized', False):
@@ -216,6 +234,7 @@ with st.sidebar:
                     st.session_state.agents_initialized = True
                     st.success("✅ Agents ready with Groq! (Free tier: 1000 requests/day)")
                     st.balloons()
+                    st.rerun()
                     time.sleep(1)
         except Exception as e:
             st.error(f"Failed to initialize agents: {e}")
@@ -256,7 +275,7 @@ with col2:
 # Process button and API key check
 if st.button("Start your Healing", type="primary"):
     if not st.session_state.get('agents_initialized', False):
-        st.warning("Please enter your Groq API key first!")
+        st.warning("Agents not ready yet. Please wait for initialization in the sidebar.")
     else:
         therapist_agent = st.session_state.therapist_agent
         closure_agent = st.session_state.closure_agent
