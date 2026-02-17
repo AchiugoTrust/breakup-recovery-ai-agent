@@ -1,7 +1,6 @@
 from agno.agent import Agent
 from agno.models.groq import Groq
 from agno.media import Image as AgnoImage
-from agno.tools.duckduckgo import DuckDuckGoTools
 import streamlit as st
 from typing import List, Optional
 import logging
@@ -109,7 +108,6 @@ def initialize_agents(api_key: str) -> tuple[Agent, Agent, Agent, Agent]:
         brutal_honesty_agent = Agent(
             model=groq_model,
             name="Brutal Honesty Agent",
-            tools=[DuckDuckGoTools()],
             instructions=[
                 "You are a direct feedback specialist that:",
                 "1. Gives raw, objective feedback about breakups",
