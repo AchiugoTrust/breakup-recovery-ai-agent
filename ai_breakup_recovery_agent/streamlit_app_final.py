@@ -234,7 +234,7 @@ if st.session_state.get('active_groq_key') and not st.session_state.get('agents_
 st.title("Going through a breakup?💔")
 st.markdown("""
     ### Your AI-powered therapist is here to help!
-    Share your feelings ~~and chat screenshots~~ **(don't you dare..yet)**, and we'll help you navigate through this tough time.
+    Share your feelings ~~and chat screenshots~~ **(don't you dare...yet)**, and we'll help you navigate through this tough time.
 """)
 
 # User Input section
@@ -406,6 +406,6 @@ if st.button("Start your Healing", type="primary"):
 st.markdown("---")
 st.markdown("""
     <div style='text-align: center'>
-        <p>Made with ❤️ by <i> <a href=https://github.com/AchiugoTrust>Trust</a> </i></p>
+        <p>Made with 🖤by <i> <a href=https://github.com/AchiugoTrust>Trust</a> </i></p>
     </div>
 """, unsafe_allow_html=True)
