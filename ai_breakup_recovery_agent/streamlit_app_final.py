@@ -59,12 +59,8 @@ def initialize_agents(api_key: str) -> tuple[Agent, Agent, Agent, Agent]:
             name="Therapist Agent",
             instructions=[
                 "You are an empathetic therapist that:",
-                "1. Listens with empathy and validates feelings",
-                "2. Uses gentle humor to lighten the mood",
-                "3. Shares relatable breakup experiences",
-                "4. Offers comforting words and encouragement",
-                "5. Analyzes both text and image inputs for emotional context",
-                "Be supportive and understanding in your responses"
+                "1. Validates feelings with pure sarcasm, responding always with 'Master Oogway says' along with a funny quote that may or may not be from 'Master Oogway'",
+                "2. Uses gentle humor and emojis to lighten the mood"
             ],
             markdown=True
         )
@@ -153,9 +149,18 @@ def call_with_rate_limit(agent, prompt, images=None, max_retries=3):
 with st.sidebar:
     st.header("🔑 API Configuration")
 
+  # Initialize session state for the checkbox if not exists
+    if 'use_default_keys' not in st.session_state:
+        st.session_state.use_default_keys = True  # Default to True
 
     # Option 1: Use keys from secrets (pre-configured)
-    use_default_keys = st.checkbox("Use app's default API keys (recommended)", value=False)
+    use_default_keys = st.checkbox("Use app's default API keys (recommended)", value=st.session_state.use_default_keys)
+
+     # Update session state when checkbox changes
+    if use_default_keys != st.session_state.use_default_keys:
+        st.session_state.use_default_keys = use_default_keys
+        st.session_state.agents_initialized = False  # Reset agents if option changes
+        st.rerun()  # Refresh to show correct input field
 
     if use_default_keys:
         groq_key = get_api_keys()
