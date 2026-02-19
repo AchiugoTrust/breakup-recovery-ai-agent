@@ -49,8 +49,6 @@ def initialize_agents(api_key: str) -> tuple[Agent, Agent, Agent, Agent]:
             id="llama-3.3-70b-versatile",  # Best for general conversation
             api_key=groq_key  # Pass your Groq API key
         )
-
-        time.sleep(1)
         
         st.session_state.groq_model = groq_model
         
@@ -65,7 +63,6 @@ def initialize_agents(api_key: str) -> tuple[Agent, Agent, Agent, Agent]:
             markdown=True
         )
 
-        time.sleep(1)
 
 
         closure_agent = Agent(
@@ -82,7 +79,6 @@ def initialize_agents(api_key: str) -> tuple[Agent, Agent, Agent, Agent]:
             markdown=True
 
         )
-        time.sleep(1)
 
 
         routine_planner_agent = Agent(
@@ -98,7 +94,6 @@ def initialize_agents(api_key: str) -> tuple[Agent, Agent, Agent, Agent]:
             ],
             markdown=True
         )
-        time.sleep(1)
 
 
         brutal_honesty_agent = Agent(
@@ -114,7 +109,6 @@ def initialize_agents(api_key: str) -> tuple[Agent, Agent, Agent, Agent]:
             ],
             markdown=True
         )
-        time.sleep(1)
 
         if not all([therapist_agent, closure_agent, routine_planner_agent, brutal_honesty_agent]):
             raise Exception("One or more agents failed to initialize")
@@ -212,7 +206,7 @@ with st.sidebar:
 
 if st.session_state.get('active_groq_key') and not st.session_state.get('agents_initialized', False):
     try:
-        with st.spinner("🔄 Initializing AI agents with Groq..."):
+        with st.spinner("🔄 Initializing AI agents..."):
             therapist, closure, routine, brutal = initialize_agents(st.session_state.active_groq_key)
             
             if all([therapist, closure, routine, brutal]):
@@ -256,15 +250,88 @@ with col1:
 with col2:
     st.subheader("Upload Chat Screenshots")
     uploaded_files = st.file_uploader(
-        "Upload screenshots of your chats (optional)",
+        "Upload screenshots of your chats (coming soon!)",
         type=["jpg", "jpeg", "png"],
         accept_multiple_files=True,
+        help="📸 Image analysis is in development - coming soon!",
         key="screenshots"
     )
-    
+     
+                                # ===== TEMPORARY IMAGE HANDLER (until Groq supports vision) =====
     if uploaded_files:
-        for file in uploaded_files:
-            st.image(file, caption=file.name, use_container_width=True)
+        count = len(uploaded_files)
+        
+        # Fun responses based on number of images
+        if count == 1:
+            st.warning("""
+            ### 😭 You dared
+            ### 📸 Nice screenshot though!
+            
+            **Current status:** 😅 I'm text-only right now
+            **Coming soon:** 🔮 Image analysis
+            
+            *For now, please describe what's in the image!*
+            """)
+            st.caption("👀 I bet it's a lovely screenshot though...")
+            
+        elif count <= 3:
+            st.error(f"""
+            ### 🚫 Whoa there! {count} images?
+            
+            You uploaded {count} images, but I can't see them yet!
+            
+            **Feature status:** 🚧 Under construction
+            **Workaround:** 📝 Describe what's in the images
+            
+            *Thanks for being an early tester!*
+            """)
+            
+            # Add a little personality
+            col1, col2, col3 = st.columns(3)
+            with col2:
+                st.markdown("😅 **Soon!**")
+                
+        else:
+            # Extra enthusiasm for power users
+            st.markdown(f"""
+            <div style='padding: 20px; background: #fff3cd; border-radius: 10px; text-align: center;'>
+                <h3>📸📸📸 {count} IMAGES?! 📸📸📸</h3>
+                <p style='font-size: 24px;'>You're really testing me!</p>
+                <p><i>I wish I could see them all...</i></p>
+                <p>🏆 <b>Most enthusiastic uploader award</b> goes to you!</p>
+                <p style='font-size: 12px;'>Image support coming soon, promise! 🤞</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Fun button
+            if st.button("😤 I just really wanted to share screenshots"):
+                st.info("Your screenshots are beautiful in my imagination! ✨")
+                for i in range(3):
+                    time.sleep(0.3)
+                    st.markdown(f"*imagining screenshot {i+1}...*")
+                st.success("🎉 Imagination complete! They were lovely.")
+        
+        # Set all_images to empty list since we can't process them
+        all_images = []
+        
+        # Add a helpful text input for description
+        st.info("💡 **Tip:** Describe what's in your screenshot and I'll analyze it!")
+        image_description = st.text_area(
+            "What do your screenshots show?",
+            placeholder="e.g., 'A WhatsApp conversation where my ex said...'",
+            key="image_description"
+        )
+        
+        if image_description:
+            # Append the description to user_input for context
+            user_input += f"\n\n[From screenshot description: {image_description}]"
+            st.success("✅ Thanks! I'll use that context.")
+        
+    else:
+        # No images uploaded - proceed normally
+        all_images = []
+        image_description = ""
+
 
 # Process button and API key check
 if st.button("Start your Healing", type="primary"):
@@ -280,26 +347,7 @@ if st.button("Start your Healing", type="primary"):
             if user_input or uploaded_files:
                 try:
                     st.header("Your Personalized Recovery Plan")
-                    
-                    def process_images(files):
-                        processed_images = []
-                        for file in files:
-                            try:
-                                temp_dir = tempfile.gettempdir()
-                                temp_path = os.path.join(temp_dir, f"temp_{file.name}")
-                                
-                                with open(temp_path, "wb") as f:
-                                    f.write(file.getvalue())
-                                
-                                agno_image = AgnoImage(filepath=Path(temp_path))
-                                processed_images.append(agno_image)
-                                
-                            except Exception as e:
-                                logger.error(f"Error processing image {file.name}: {str(e)}")
-                                continue
-                        return processed_images
-                    
-                    all_images = process_images(uploaded_files) if uploaded_files else []
+                               
                     
                     # Therapist Analysis
                     with st.spinner("🤗 Getting empathetic support..."):
@@ -313,7 +361,6 @@ if st.button("Start your Healing", type="primary"):
                         3. Relatable experiences
                         4. Words of encouragement
                         """
-                        time.sleep(1)
                         response = call_with_rate_limit(
                             therapist_agent,
                             therapist_prompt,
@@ -323,7 +370,6 @@ if st.button("Start your Healing", type="primary"):
                         st.subheader("🤗 Emotional Support")
                         st.markdown(response.content)
 
-                        time.sleep(2) 
                     
                     # Closure Messages
                     with st.spinner("✍️ Crafting closure messages..."):
@@ -337,7 +383,6 @@ if st.button("Start your Healing", type="primary"):
                         3. Closure rituals
                         4. Moving forward strategies
                         """
-                        time.sleep(1)
                         
                         response = call_with_rate_limit(
                             closure_agent,
@@ -348,7 +393,6 @@ if st.button("Start your Healing", type="primary"):
                         st.subheader("✍️ Finding Closure")
                         st.markdown(response.content)
 
-                        time.sleep(2) 
                     
                     # Recovery Plan
                     with st.spinner("📅 Creating your recovery plan..."):
@@ -362,7 +406,6 @@ if st.button("Start your Healing", type="primary"):
                         3. Social media guidelines
                         4. Mood-lifting music suggestions
                         """
-                        time.sleep(1)
                         
                         response = call_with_rate_limit(
                             routine_planner_agent,
@@ -373,7 +416,6 @@ if st.button("Start your Healing", type="primary"):
                         st.subheader("📅 Your Recovery Plan")
                         st.markdown(response.content)
 
-                        time.sleep(2) 
                     
                     # Honest Feedback
                     with st.spinner("💪 Getting honest perspective..."):
@@ -387,7 +429,6 @@ if st.button("Start your Healing", type="primary"):
                         3. Future outlook
                         4. Actionable steps
                         """
-                        time.sleep(1)
                         response = call_with_rate_limit(
                             brutal_honesty_agent,
                             honesty_prompt,
@@ -397,7 +438,6 @@ if st.button("Start your Healing", type="primary"):
                         st.subheader("💪 Honest Perspective")
                         st.markdown(response.content)
 
-                        time.sleep(2) 
                             
                 except Exception as e:
                     logger.error(f"Error during analysis: {str(e)}")
